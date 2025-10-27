@@ -47,4 +47,11 @@ impl Pass {
             (text.as_ref(), LMT(transform.into()), wrap, halign, valign),
         )
     }
+    pub fn set_color(&self, color: glam::Vec4) -> LuaResult<()> {
+        self.0
+            .call_method("setColor", (color.x, color.y, color.z, color.w))
+    }
+    pub fn transform(&self, transform: impl Into<glam::Mat4>) -> LuaResult<()> {
+        self.0.call_method("transform", LMT(transform.into()))
+    }
 }
