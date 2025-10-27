@@ -7,7 +7,7 @@ use crate::{
     lovr_enum,
 };
 
-///A reference to a blob. Can be cloned.
+///A reference to a Pass.
 #[derive(Clone, Debug, PartialEq, From)]
 pub struct Pass(pub LuaAnyUserData);
 
