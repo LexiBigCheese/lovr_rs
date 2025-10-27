@@ -1,0 +1,50 @@
+use derive_more::From;
+use mlua::prelude::*;
+
+use crate::{
+    HasLuaRef, from_into_lua_wrapper,
+    lovr::{Lovr, math::LMT},
+    lovr_enum,
+};
+
+///A reference to a blob. Can be cloned.
+#[derive(Clone, Debug, PartialEq, From)]
+pub struct Pass(pub LuaAnyUserData);
+
+from_into_lua_wrapper!(Pass, LuaAnyUserData);
+
+lovr_enum!(HorizontalAlign, Left, Center, Right);
+
+lovr_enum!(VerticalAlign, Top, Middle, Bottom);
+
+impl Pass {
+    pub fn cube(&self, transform: impl Into<glam::Mat4>) -> LuaResult<()> {
+        self.0.call_method("cube", LMT(transform.into()))
+    }
+    pub fn cube_wire(&self, transform: impl Into<glam::Mat4>) -> LuaResult<()> {
+        self.0.call_method("cube", (LMT(transform.into()), "line"))
+    }
+    pub fn text(&self, text: impl AsRef<str>, transform: impl Into<glam::Mat4>) -> LuaResult<()> {
+        self.0
+            .call_method("text", (text.as_ref(), LMT(transform.into())))
+    }
+    ///Default Values:
+    /// ```
+    /// wrap: 0,
+    /// halign: 'center',
+    /// valign: 'middle'
+    /// ```
+    pub fn text_extra_opts(
+        &self,
+        text: impl AsRef<str>,
+        transform: impl Into<glam::Mat4>,
+        wrap: f32,
+        halign: HorizontalAlign,
+        valign: VerticalAlign,
+    ) -> LuaResult<()> {
+        self.0.call_method(
+            "text",
+            (text.as_ref(), LMT(transform.into()), wrap, halign, valign),
+        )
+    }
+}

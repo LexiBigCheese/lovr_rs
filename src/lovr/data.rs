@@ -1,22 +1,13 @@
+use derive_more::From;
 use mlua::prelude::*;
 
-use crate::{HasLuaRef, lovr::Lovr};
+use crate::{HasLuaRef, from_into_lua_wrapper, lovr::Lovr};
 
 ///A reference to a blob. Can be cloned.
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, From)]
 pub struct Blob(pub LuaAnyUserData);
 
-impl FromLua for Blob {
-    fn from_lua(value: LuaValue, lua: &Lua) -> LuaResult<Self> {
-        Ok(Blob(LuaAnyUserData::from_lua(value, lua)?))
-    }
-}
-
-impl IntoLua for Blob {
-    fn into_lua(self, lua: &Lua) -> LuaResult<LuaValue> {
-        self.0.into_lua(lua)
-    }
-}
+from_into_lua_wrapper!(Blob, LuaAnyUserData);
 
 macro_rules! blob_fn {
     ($fn_name:ident,$fn_str:expr,$type:ty) => {

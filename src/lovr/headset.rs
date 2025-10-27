@@ -4,6 +4,7 @@ use mlua::prelude::*;
 use crate::{
     HasLuaRef,
     lovr::math::{AngleAxis, Pose},
+    lovr_enum,
 };
 #[derive(From, Into, AsRef)]
 pub struct Headset<'a>(&'a Lua);
@@ -27,32 +28,10 @@ impl IntoLua for Device {
     }
 }
 
-//TODO: generate from docs
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-pub enum DeviceAxis {
-    Trigger,
-    Thumbstick,
-    Touchpad,
-    Grip,
-    Nib,
-}
+lovr_enum!(DeviceAxis, Trigger, Thumbstick, Touchpad, Grip, Nib);
 
-impl IntoLua for DeviceAxis {
-    fn into_lua(self, lua: &Lua) -> LuaResult<LuaValue> {
-        match self {
-            DeviceAxis::Trigger => "trigger",
-            DeviceAxis::Thumbstick => "thumbstick",
-            DeviceAxis::Touchpad => "touchpad",
-            DeviceAxis::Grip => "grip",
-            DeviceAxis::Nib => "nib",
-        }
-        .into_lua(lua)
-    }
-}
-
-//TODO: generate from docs
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-pub enum DeviceButton {
+lovr_enum!(
+    DeviceButton,
     Trigger,
     Thumbstick,
     Thumbrest,
@@ -63,27 +42,8 @@ pub enum DeviceButton {
     B,
     X,
     Y,
-    Nib,
-}
-
-impl IntoLua for DeviceButton {
-    fn into_lua(self, lua: &Lua) -> LuaResult<LuaValue> {
-        match self {
-            DeviceButton::Trigger => "trigger",
-            DeviceButton::Thumbstick => "thumbstick",
-            DeviceButton::Thumbrest => "thumbrest",
-            DeviceButton::Touchpad => "touchpad",
-            DeviceButton::Grip => "grip",
-            DeviceButton::Menu => "menu",
-            DeviceButton::A => "a",
-            DeviceButton::B => "b",
-            DeviceButton::X => "x",
-            DeviceButton::Y => "y",
-            DeviceButton::Nib => "nib",
-        }
-        .into_lua(lua)
-    }
-}
+    Nib
+);
 
 macro_rules! device_button_bool {
     ($id:ident,$path:expr) => {
