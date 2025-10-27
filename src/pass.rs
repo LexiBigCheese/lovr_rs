@@ -47,6 +47,7 @@ impl Pass {
             (text.as_ref(), LMT(transform.into()), wrap, halign, valign),
         )
     }
+    //TODO: some sort of color trait
     pub fn set_color(&self, color: glam::Vec4) -> LuaResult<()> {
         self.0
             .call_method("setColor", (color.x, color.y, color.z, color.w))
