@@ -1,10 +1,7 @@
 use derive_more::{AsRef, From, Into};
 use mlua::prelude::*;
 
-use crate::{
-    HasLuaRef,
-    lovr::math::{AngleAxis, Pose},
-};
+use crate::lovr::math::{AngleAxis, Pose};
 use lovr_rs_bindings::headset::{Device, DeviceAxis, DeviceButton, Headset as HeadsetBind};
 #[derive(From, Into, AsRef)]
 pub struct Headset<'a>(&'a Lua);
