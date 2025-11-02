@@ -2,10 +2,7 @@ use derive_more::From;
 use lovr_rs_bindings::graphics::{HorizontalAlign, VerticalAlign};
 use mlua::prelude::*;
 
-use crate::{
-    from_into_lua_wrapper,
-    lovr::math::LMT,
-};
+use crate::{from_into_lua_wrapper, lovr::math::LMT};
 
 ///A reference to a Pass.
 #[derive(Clone, Debug, PartialEq, From)]
