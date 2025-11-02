@@ -4,87 +4,62 @@ use mlua::prelude::*;
 use crate::{
     HasLuaRef,
     lovr::math::{AngleAxis, Pose},
-    lovr_enum,
 };
+use lovr_rs_bindings::headset::{Device, DeviceAxis, DeviceButton, Headset as HeadsetBind};
 #[derive(From, Into, AsRef)]
 pub struct Headset<'a>(&'a Lua);
 
-//TODO: generate from docs
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-pub enum Device {
-    Head,
-    Left,
-    Right,
-}
-
-impl IntoLua for Device {
-    fn into_lua(self, lua: &Lua) -> LuaResult<LuaValue> {
-        match self {
-            Device::Head => "head",
-            Device::Left => "left",
-            Device::Right => "right",
-        }
-        .into_lua(lua)
-    }
-}
-
-lovr_enum!(DeviceAxis, Trigger, Thumbstick, Touchpad, Grip, Nib);
-
-lovr_enum!(
-    DeviceButton,
-    Trigger,
-    Thumbstick,
-    Thumbrest,
-    Touchpad,
-    Grip,
-    Menu,
-    A,
-    B,
-    X,
-    Y,
-    Nib
-);
-
-macro_rules! device_button_bool {
-    ($id:ident,$path:expr) => {
+macro_rules! neo_device_button_bool {
+    ($id:ident) => {
         pub fn $id(&self, device: Device, button: DeviceButton) -> bool {
-            self.call_fn_bool($path, (device, button))
+            self.lb()
+                .$id()
+                .execute_direct((device, button))
+                .unwrap_or_default()
         }
     };
 }
 
-macro_rules! device_lmr {
-    ($id:ident,$path:expr,$type:ty) => {
+macro_rules! neo_device_lmr {
+    ($id:ident,$type:ty) => {
         pub fn $id(&self, device: Device) -> mlua::Result<$type> {
-            self.call_fn_lmr($path, device)
+            self.lb()
+                .$id()
+                .execute_direct::<crate::lovr::math::LMR<$type>>((device))
+                .map(|x| x.0)
         }
     };
 }
 
-macro_rules! device_vec3 {
-    ($id:ident,$path:expr) => {
-        device_lmr!($id, $path, glam::Vec3);
+macro_rules! neo_device_vec3 {
+    ($id:ident) => {
+        neo_device_lmr!($id, glam::Vec3);
     };
 }
-
 impl<'a> Headset<'a> {
+    pub fn lb(&self) -> HeadsetBind<'_> {
+        HeadsetBind::lovr_new(&self.0)
+    }
     pub fn is_tracked(&self, device: Device) -> bool {
-        // helper_call(lua, path, params)
-        self.call_fn_bool("lovr.headset.isTracked", device)
+        self.lb()
+            .is_tracked()
+            .execute_direct(device)
+            .unwrap_or_default()
     }
     pub fn get_axis<R: FromLuaMulti>(&self, device: Device, axis: DeviceAxis) -> LuaResult<R> {
-        self.call_fn("lovr.headset.getAxis", (device, axis))
+        self.lb().get_axis().device(device)?.axis(axis)?.execute()
     }
-    device_button_bool!(is_down, "lovr.headset.isDown");
-    device_button_bool!(is_touched, "lovr.headset.isTouched");
-    device_button_bool!(was_pressed, "lovr.headset.wasPressed");
-    device_button_bool!(was_released, "lovr.headset.wasReleased");
-    device_vec3!(get_angular_velociry, "lovr.headset.getAngularVelocity");
-    device_vec3!(get_direction, "lovr.headset.getDirection");
-    device_lmr!(get_orientation, "lovr.headset.getOrientation", AngleAxis);
-    device_lmr!(get_pose, "lovr.headset.getPose", Pose);
-    device_vec3!(get_position, "lovr.headset.getPosition");
-    device_vec3!(get_velocity, "lovr.headset.getVelocity");
+
+    neo_device_button_bool!(is_down);
+    neo_device_button_bool!(is_touched);
+    neo_device_button_bool!(was_pressed);
+    neo_device_button_bool!(was_released);
+    neo_device_vec3!(get_angular_velocity);
+    neo_device_vec3!(get_direction);
+    neo_device_lmr!(get_orientation, AngleAxis);
+    neo_device_lmr!(get_pose, Pose);
+    neo_device_vec3!(get_position);
+    neo_device_vec3!(get_velocity);
     pub fn vibrate(
         &self,
         device: Device,
@@ -92,13 +67,12 @@ impl<'a> Headset<'a> {
         duration: f32,
         frequency: f32,
     ) -> LuaResult<()> {
-        self.call_fn(
-            "lovr.headset.vibrate",
-            (device, strength, duration, frequency),
-        )
+        self.lb()
+            .vibrate()
+            .execute_direct((device, strength, duration, frequency))
     }
     pub fn stop_vibration(&self, device: Device) -> LuaResult<()> {
-        self.call_fn("lovr.headset.stopVibration", device)
+        self.lb().stop_vibration().execute_direct(device)
     }
     //todo: get_skeleton
 }

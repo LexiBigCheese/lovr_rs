@@ -1,10 +1,10 @@
 use derive_more::From;
+use lovr_rs_bindings::graphics::{HorizontalAlign, VerticalAlign};
 use mlua::prelude::*;
 
 use crate::{
     HasLuaRef, from_into_lua_wrapper,
     lovr::{Lovr, math::LMT},
-    lovr_enum,
 };
 
 ///A reference to a Pass.
@@ -12,10 +12,6 @@ use crate::{
 pub struct Pass(pub LuaAnyUserData);
 
 from_into_lua_wrapper!(Pass, LuaAnyUserData);
-
-lovr_enum!(HorizontalAlign, Left, Center, Right);
-
-lovr_enum!(VerticalAlign, Top, Middle, Bottom);
 
 impl Pass {
     pub fn cube(&self, transform: impl Into<glam::Mat4>) -> LuaResult<()> {

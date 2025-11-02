@@ -9,7 +9,7 @@ pub struct Blob(pub LuaAnyUserData);
 
 from_into_lua_wrapper!(Blob, LuaAnyUserData);
 
-macro_rules! blob_fn {
+macro_rules! noparam_fn {
     ($fn_name:ident,$fn_str:expr,$type:ty) => {
         pub fn $fn_name(&self) -> mlua::Result<$type> {
             self.0.call_method($fn_str, ())
@@ -18,10 +18,10 @@ macro_rules! blob_fn {
 }
 
 impl Blob {
-    blob_fn!(get_size, "getSize", usize);
-    blob_fn!(get_name, "getName", String);
-    blob_fn!(get_pointer, "getPointer", usize);
-    blob_fn!(get_string, "getString", String);
+    noparam_fn!(get_size, "getSize", usize);
+    noparam_fn!(get_name, "getName", String);
+    noparam_fn!(get_pointer, "getPointer", usize);
+    noparam_fn!(get_string, "getString", String);
     pub fn borrow(&self, func: impl FnOnce(&[u8])) -> mlua::Result<()> {
         let size = self.get_size()?;
         let ptr = self.get_pointer()?;
@@ -52,4 +52,16 @@ impl Blob {
     pub fn from_str(lovr: &Lovr, data: impl AsRef<str>, name: impl IntoLua) -> mlua::Result<Blob> {
         Blob::from_slice(lovr, data.as_ref().as_bytes(), name)
     }
+}
+
+///A reference to an image. Can be cloned.
+#[derive(Clone, Debug, PartialEq, From)]
+pub struct Image(pub LuaAnyUserData);
+
+from_into_lua_wrapper!(Image, LuaAnyUserData);
+
+impl Image {
+    noparam_fn!(encode, "encode", Blob);
+    noparam_fn!(get_blob, "getBlob", Blob);
+    noparam_fn!(get_dimensions, "getDimensions", (usize, usize));
 }
