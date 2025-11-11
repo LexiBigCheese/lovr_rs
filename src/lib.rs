@@ -1,6 +1,5 @@
 pub mod call_helpers;
 pub mod lovr;
-pub mod pass;
 pub use call_helpers::{helper_call, helper_call_iter};
 
 pub use lovr_rs_bindings;
